@@ -5,8 +5,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Sudo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    .row {
+      display: flex;
+    }
+
+    .outer {
+      background-color: white;
+      border: #443 3px solid;
+    }
+
+    .cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 60px;
+      height: 60px;
+      border-right: solid 1px #999;
+      border-bottom: solid 1px #999;
+    }
+
+    .right-border {
+      border-right: solid 2px #433;
+    }
+
+    .bottom-border {
+      border-bottom: solid 2px #443;
+    }
+
+    .no-right-border {
+      border-right: none;
+    }
+
+    .no-bottom-border {
+      border-bottom: none;
+    }
+
+    .input {
+      overflow: hidden;
+      margin: 2px;
+      width: 40px;
+      height: 40px;
+      font-family: "lucida handwriting","comic sans ms",cursive;
+      font-size: 30px;
+      background-color: transparent;
+      color: red;
+      border: none;
+      text-align: center;
+      outline: none;
+    }
+
+    .input:focus {
+      border: solid 1px #ffcc00;
+      color: #7777dd;
+    }
+
+    .input.inputable {
+      color: #7777dd;
+    }
+
+  </style>
 </head>
 <body>
+  <div id="app"></div>
+  <script src="../node_modules//vue/dist/vue.js"></script>
   <script src="sudo.js"></script>
+  <script>
+    new Vue({
+      template: 
+      `<div class="row">
+        <div class="outer">
+          <div class="row" v-for="(row, index) of arr" :key="index">
+            <div class="cell" :class="{'right-border': col === 2 || col === 5, 'bottom-border': row === 2 || row === 5, 'no-right-border': col === 8, 'no-bottom-border': row === 8}" v-for="(col, index) of arr" :key="index">
+              <input class="input" :class="{inputable: !originalMatrix[row][col]}" :disabled="!!originalMatrix[row][col]" :value="matrix[row][col] || ''"/>  
+            </div>
+          </div>
+        </div>
+      </div>`,
+      data() {
+        return {
+          arr: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          matrix: [
+            [0,4,2,9,0,0,7,0,0],
+            [5,0,0,1,0,0,0,9,0],
+            [1,0,0,0,0,0,8,0,5],
+            [0,3,0,7,2,0,4,0,9],
+            [0,0,8,0,0,0,3,0,0],
+            [9,0,4,0,3,8,0,5,0],
+            [8,0,7,0,0,0,0,0,1],
+            [0,5,0,0,0,6,0,0,4],
+            [0,0,1,0,0,9,5,2,0]
+          ],
+          originalMatrix: [
+            [0,4,2,9,0,0,7,0,0],
+            [5,0,0,1,0,0,0,9,0],
+            [1,0,0,0,0,0,8,0,5],
+            [0,3,0,7,2,0,4,0,9],
+            [0,0,8,0,0,0,3,0,0],
+            [9,0,4,0,3,8,0,5,0],
+            [8,0,7,0,0,0,0,0,1],
+            [0,5,0,0,0,6,0,0,4],
+            [0,0,1,0,0,9,5,2,0]
+          ]
+        }
+      },
+      methods: {
+        solve() {
+          this.matrix = matrix;
+        },
+      },      
+      mounted() {
+        this.originalMatrix = JSON.parse(JSON.stringify(this.matrix));
+        this.solve();
+      }
+    }).$mount('#app')
+  </script>
 </body>
 </html>
