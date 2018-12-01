@@ -67,6 +67,10 @@
       color: #7777dd;
     }
 
+    .btn-container {
+      margin-top: 32px;
+    }
+
   </style>
 </head>
 <body>
@@ -74,31 +78,39 @@
   <script src="../node_modules//vue/dist/vue.js"></script>
   <script src="sudo.js"></script>
   <script>
+    var zeros = [
+      [0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0]
+    ];
     new Vue({
       template: 
-      `<div class="row">
-        <div class="outer">
-          <div class="row" v-for="(row, index) of arr" :key="index">
-            <div class="cell" :class="{'right-border': col === 2 || col === 5, 'bottom-border': row === 2 || row === 5, 'no-right-border': col === 8, 'no-bottom-border': row === 8}" v-for="(col, index) of arr" :key="index">
-              <input class="input" :class="{inputable: !originalMatrix[row][col]}" :disabled="!!originalMatrix[row][col]" :value="matrix[row][col] || ''"/>  
+      `<div>
+        <div class="row">
+          <div class="outer">
+            <div class="row" v-for="(row, index) of arr" :key="index">
+              <div class="cell" :class="{'right-border': col === 2 || col === 5, 'bottom-border': row === 2 || row === 5, 'no-right-border': col === 8, 'no-bottom-border': row === 8}" v-for="(col, index) of arr" :key="index">
+                <input class="input" :class="{inputable: !originalMatrix[row][col]}" :disabled="!!originalMatrix[row][col]" :value="matrix[row][col] || ''" @blur="onInputBlur(row, col, $event)"/>  
+              </div>
             </div>
           </div>
+        </div>        
+        <div class="row btn-container">
+          <button @click="clear">Clear</button>
+          <button @click="set">Set</button>
+          <button @click="solve">Solve</button>
         </div>
       </div>`,
       data() {
         return {
           arr: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-          matrix: [
-            [0,4,2,9,0,0,7,0,0],
-            [5,0,0,1,0,0,0,9,0],
-            [1,0,0,0,0,0,8,0,5],
-            [0,3,0,7,2,0,4,0,9],
-            [0,0,8,0,0,0,3,0,0],
-            [9,0,4,0,3,8,0,5,0],
-            [8,0,7,0,0,0,0,0,1],
-            [0,5,0,0,0,6,0,0,4],
-            [0,0,1,0,0,9,5,2,0]
-          ],
+          matrix: JSON.parse(JSON.stringify(zeros)),
           originalMatrix: [
             [0,4,2,9,0,0,7,0,0],
             [5,0,0,1,0,0,0,9,0],
@@ -113,13 +125,27 @@
         }
       },
       methods: {
-        solve() {
-          this.matrix = matrix;
+        clear() {
+          this.matrix = JSON.parse(JSON.stringify(zeros));
         },
+        set() {
+          this.originalMatrix = this.matrix;
+        },
+        solve() {
+          sudo.solve(this.matrix);
+        },
+        updateMatrix(rowIndex, colIndex, val) {
+          this.matrix[rowIndex][colIndex] = val;
+        },
+        onInputBlur(rowIndex, colIndex, event) {
+          console.log(this.matrix)
+          var value = parseInt(event.srcElement.value);
+          this.updateMatrix(rowIndex, colIndex, value);
+        }
       },      
       mounted() {
         this.originalMatrix = JSON.parse(JSON.stringify(this.matrix));
-        this.solve();
+        // this.solve();
       }
     }).$mount('#app')
   </script>
