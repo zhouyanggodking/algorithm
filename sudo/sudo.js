@@ -22,12 +22,48 @@
 var sudo = (function(){
 
   function getPossibleValues(matrix, rowIndex, colIndex) {
-    var rowPossibleValues = getRowPossibleValues(matrix, rowIndex, colIndex);
-    var colPossibleValues = getColPossibleValues(matrix, rowIndex, colIndex);
-    var squarePossibleValues = getSquarePossibleValues(matrix, rowIndex, colIndex);
-  
-    var allPossibleValues = interset(interset(rowPossibleValues, colPossibleValues), squarePossibleValues)
-    return [...allPossibleValues];
+    var tVals = checkTrickyUnique(matrix, rowIndex, colIndex);
+    if (!tVals.length) {
+      var rowPossibleValues = getRowPossibleValues(matrix, rowIndex, colIndex);
+      var colPossibleValues = getColPossibleValues(matrix, rowIndex, colIndex);
+      var squarePossibleValues = getSquarePossibleValues(matrix, rowIndex, colIndex);
+    
+      var allPossibleValues = interset(interset(rowPossibleValues, colPossibleValues), squarePossibleValues)
+      return allPossibleValues;
+    }
+    return tVals;
+  }
+
+  function checkTrickyUnique(matrix, rowIndex, colIndex) {
+    if (!matrix[rowIndex][colIndex]) {
+      var valueSet = getValueSet();    
+      var center = getSquareCenter(rowIndex, colIndex);
+      var otherPossibleValues = [];
+      for (var i = center.rowIndex - 1; i <= center.rowIndex + 1; ++i) {
+        for (var j = center.colIndex - 1; j <= center.colIndex + 1; ++j) {
+          // console.log(`i=${i}, j=${j}`)
+          if (!(i == rowIndex && j == colIndex)) {
+            if (!matrix[i][j]) {
+              var p = interset(getColPossibleValues(matrix, i, j), getRowPossibleValues(matrix, i, j));
+              // console.log(`i=${i}, j=${j}, ${p}`)
+              otherPossibleValues = otherPossibleValues.concat(p);
+              console.log(otherPossibleValues)
+            } else {
+              console.log(`i=${i}, j=${j}, ${[matrix[i][j]]}`)
+              otherPossibleValues = otherPossibleValues.concat([matrix[i][j]]);
+            }            
+          }
+        }
+      }
+      var otherPossibleValueSet = new Set(otherPossibleValues);
+      // console.log(otherPossibleValueSet)
+      otherPossibleValueSet.forEach(v => {
+        valueSet.delete(v);
+      });
+      // console.log(valueSet)
+      return [...valueSet];
+    }
+    return [matrix[rowIndex][colIndex]];  
   }
   
   
@@ -63,6 +99,30 @@ var sudo = (function(){
       squareValues.forEach(v => {
         valueSet.delete(v);
       });
+      // console.log(center);
+      // var otherPossibleValues = [];
+      // for (var i = center.rowIndex - 1; i <= center.rowIndex + 1; ++i) {
+      //   for (var j = center.colIndex - 1; j <= center.colIndex + 1; ++j) {
+      //     // console.log(`i=${i}, j=${j}`)
+      //     if (!(i == rowIndex && j == colIndex)) {
+      //       if (!matrix[i][j]) {
+      //         var p = interset(getColPossibleValues(matrix, i, j), getRowPossibleValues(matrix, i, j));
+      //         console.log(`i=${i}, j=${j}, ${p}`)
+      //         otherPossibleValues = otherPossibleValues.concat(p);
+      //         console.log(otherPossibleValues)
+      //       } else {
+      //         console.log(`i=${i}, j=${j}, ${[matrix[i][j]]}`)
+      //         otherPossibleValues = otherPossibleValues.concat([matrix[i][j]]);
+      //       }            
+      //     }
+      //   }
+      // }
+      // var otherPossibleValueSet = new Set(otherPossibleValues);
+      // console.log(otherPossibleValueSet)
+      // otherPossibleValueSet.forEach(v => {
+      //   valueSet.delete(v);
+      // });
+      // console.log(valueSet)
       return [...valueSet];
     }
     return [matrix[rowIndex][colIndex]];  
@@ -86,6 +146,7 @@ var sudo = (function(){
     return [...valueSet];
   }
   
+  
   function getValueSet() {
     return new Set(new Array(9).fill(0).map((v, i) => i + 1));
   }
@@ -98,6 +159,8 @@ var sudo = (function(){
     const maxRowIndex = 8;
     const maxColIndex = 8;
     const maxIteration = 100;
+
+    console.log(matrix)
   
     for(let iteration = 0; iteration < maxIteration; ++iteration) {
       var prevMatrixJson = JSON.stringify(matrix);
@@ -111,7 +174,7 @@ var sudo = (function(){
               console.log(`i=${i}, j=${j}, iteration=${iteration}, value=${pvs[0]}`)
             }
             if (pvs.length === 0) {
-              throw new Error('no solution');
+              // throw new Error('no solution');
             }
           }
         }
@@ -121,12 +184,28 @@ var sudo = (function(){
         break;
       }
     }
+    return JSON.parse(JSON.stringify(matrix));
   }
 
   return {
-    solve
+    solve,
+    getPossibleValues,
+    getRowPossibleValues,
+    getColPossibleValues,
+    getSquarePossibleValues
   }
 })();
+
+var matrix = [[0,0,0,2,4,0,0,0,0],[0,0,6,0,0,7,5,0,0],[1,0,0,0,0,5,0,4,0],[7,0,0,9,8,0,0,1,0],[0,8,0,0,0,0,0,0,9],[0,9,0,0,0,0,0,0,6],[5,0,0,0,0,4,0,3,0],[0,0,0,8,7,0,0,0,0],[0,0,2,0,0,3,1,0,0]]
+
+var t = sudo.getPossibleValues(matrix, 0, 5)
+
+var row = sudo.getRowPossibleValues(matrix, 0, 5)
+var col = sudo.getColPossibleValues(matrix, 0, 5)
+var s = sudo.getSquarePossibleValues(matrix, 0, 5)
+
+console.log(t, col, s)
+
 
 
 

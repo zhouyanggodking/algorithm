@@ -78,6 +78,8 @@
   <script src="../node_modules//vue/dist/vue.js"></script>
   <script src="sudo.js"></script>
   <script>
+    //[[1,0,0,5,0,0,4,0,0],[2,0,0,4,0,0,0,8,0],[4,0,0,9,0,7,1,0,0],[7,4,0,0,0,6,0,0,5],[0,0,5,0,0,0,7,0,0],[6,0,0,1,0,0,0,9,4],[0,0,2,7,0,1,0,0,3],[0,3,0,0,0,9,0,0,2],[0,0,4,0,0,8,0,0,1]]
+    //[[0,0,0,0,0,5,0,0,9],[0,4,0,0,2,0,0,5,0],[7,0,0,0,3,0,6,0,0],[0,8,0,0,5,0,0,0,3],[0,0,6,0,8,0,2,0,0],[1,0,0,0,6,9,0,4,0],[0,0,2,0,7,0,0,0,6],[0,3,0,0,4,0,0,2,0],[6,0,0,2,0,0,0,0,0]]
     var zeros = [
       [0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0],
@@ -89,6 +91,11 @@
       [0,0,0,0,0,0,0,0,0],
       [0,0,0,0,0,0,0,0,0]
     ];
+
+    function deepCopy(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
     new Vue({
       template: 
       `<div>
@@ -110,7 +117,8 @@
       data() {
         return {
           arr: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-          matrix: JSON.parse(JSON.stringify(zeros)),
+          // matrix: [[0,0,0,0,0,5,0,0,9],[0,4,0,0,2,0,0,5,0],[7,0,0,0,3,0,6,0,0],[0,8,0,0,5,0,0,0,3],[0,0,6,0,8,0,2,0,0],[1,0,0,0,6,9,0,4,0],[0,0,2,0,7,0,0,0,6],[0,3,0,0,4,0,0,2,0],[6,0,0,2,0,0,0,0,0]],
+          matrix: deepCopy(zeros),
           originalMatrix: [
             [0,4,2,9,0,0,7,0,0],
             [5,0,0,1,0,0,0,9,0],
@@ -126,25 +134,34 @@
       },
       methods: {
         clear() {
-          this.matrix = JSON.parse(JSON.stringify(zeros));
+          this.matrix = deepCopy(zeros);
+          this.originalMatrix = deepCopy(zeros);
         },
         set() {
-          this.originalMatrix = this.matrix;
+          this.originalMatrix = deepCopy(this.matrix);
+          console.log(JSON.stringify(this.matrix))
         },
         solve() {
-          sudo.solve(this.matrix);
+          this.matrix = sudo.solve(this.matrix);
+          //[[0,0,0,2,4,0,0,0,0],[0,0,6,0,0,7,5,0,0],[1,0,0,0,0,5,0,4,0],[7,0,0,9,8,0,0,1,0],[0,8,0,0,0,0,0,0,9],[0,9,0,0,0,0,0,0,6],[5,0,0,0,0,4,0,3,0],[0,0,0,8,7,0,0,0,0],[0,0,2,0,0,3,1,0,0]]
+          console.log(JSON.stringify(this.matrix))
         },
         updateMatrix(rowIndex, colIndex, val) {
           this.matrix[rowIndex][colIndex] = val;
         },
         onInputBlur(rowIndex, colIndex, event) {
-          console.log(this.matrix)
-          var value = parseInt(event.srcElement.value);
+          // console.log(this.matrix)
+          var value = parseInt(event.srcElement.value) || 0;
+          // console.log(value)
+
+          if (isNaN(value)) {
+            console.log(value)
+          }
           this.updateMatrix(rowIndex, colIndex, value);
         }
       },      
       mounted() {
-        this.originalMatrix = JSON.parse(JSON.stringify(this.matrix));
+        this.originalMatrix = deepCopy(this.matrix);
         // this.solve();
       }
     }).$mount('#app')
